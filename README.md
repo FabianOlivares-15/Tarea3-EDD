@@ -3,12 +3,12 @@ En este *repl* puedes encontrar varios ejemplos que te pueden ayudar con las tar
 ## Código de (tarea2)
 Para ejecutar el ejemplo tarea2 primero debemos compilar (en la carpeta raíz)
 ````
-gcc tdas/*.c tarea2.c -Wno-unused-result -o tarea2
+gcc tdas/*.c tarea3.c -Wno-unused-result -o tarea3
 ````
 
 Y luego ejecutar:
 ````
-./tarea2
+./tarea3
 ````
 
 ## TDAs
