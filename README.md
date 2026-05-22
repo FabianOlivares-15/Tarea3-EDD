@@ -1,7 +1,7 @@
 En este *repl* puedes encontrar varios ejemplos que te pueden ayudar con las tareas de estructura.
 
-## Código de (tarea2)
-Para ejecutar el ejemplo tarea2 primero debemos compilar (en la carpeta raíz)
+## Código de (tarea3)
+Para ejecutar el ejemplo tarea3 primero debemos compilar (en la carpeta raíz)
 ````
 gcc tdas/*.c tarea3.c -Wno-unused-result -o tarea3
 ````
