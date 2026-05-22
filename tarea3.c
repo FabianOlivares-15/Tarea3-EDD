@@ -10,11 +10,12 @@
 
 // Definición de la estructura para el estado del puzzle
 typedef struct State{
-    // Matriz NxN que representa el tablero
+    int maze[N][N]; // Matriz NxN que representa el laberinto
     int x;    // Posición x del agente
-    int y;    // Posición x del agente
+    int y;    // Posición y del agente
     int steps; // Pasos realizados hasta la posición actual
-    State* parent; //Secuencia de movimientos para llegar al estado
+    struct State* parent; //Secuencia de movimientos para llegar al estado
+    List* actions; // Lista de acciones realizadas
 } State;
 
 int distancia_L1(State* state) {
