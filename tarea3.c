@@ -3,19 +3,26 @@
 #include "tdas/list.h"
 #include "tdas/heap.h"
 #include "tdas/extra.h"
+#include "tdas/stack.h"
 #include <string.h>
 #include <time.h>
+
+#define arriba 1
+#define abajo 2
+#define derecha 3
+#define izquierda 4
+
 
 
 
 // Definición de la estructura para el estado del puzzle
 typedef struct State{
-    int maze[N][N]; // Matriz NxN que representa el laberinto
+    // Matriz NxN que representa el laberinto
     int x;    // Posición x del agente
     int y;    // Posición y del agente
     int steps; // Pasos realizados hasta la posición actual
     struct State* parent; //Secuencia de movimientos para llegar al estado
-    List* actions; // Lista de acciones realizadas
+    // Lista de acciones realizadas
 } State;
 
 int distancia_L1(State* state) {
@@ -23,13 +30,13 @@ int distancia_L1(State* state) {
 }
 
 // Función para imprimir el estado actual
-void imprimirEstado(const State *estado) {
+void imprimirEstado(const State *estado, int maze[N][N]) {
     for (int i = 0; i < N; i++) {
         for (int j = 0; j < N; j++) {
             if (estado->x==i && estado->y==j) printf(" A ");
             else if (i == 0 && j == 0) printf(" I "); 
             else if (i == N-1 && j == N-1) printf(" M ");
-            else if (estado->maze[i][j] == 0)
+            else if (maze[i][j] == 0)
                 printf(" . "); // Imprime un espacio en blanco para el espacio vacío
             else
                 printf("[X]");
@@ -38,16 +45,115 @@ void imprimirEstado(const State *estado) {
     }
 }
 
-State crearEstadoInicial(int maze[N][N], int dificultad){
-    State estado;
+State* crearEstadoInicial(int maze[N][N], int dificultad){
      // Copiar el laberinto generado al estado
-    generate_maze(estado.maze,  dificultad);
-    estado.x = 0;
-    estado.y = 0;
-    estado.steps = 0;
-    estado.actions = list_create();
+    generate_maze(maze,  dificultad);
+    State *estado = (State*)malloc(sizeof(State));
+    estado->x = 0;
+    estado->y = 0;
+    estado->steps = 0;
+    estado->parent = NULL;
+    //estado.actions = list_create();
     return estado;
 }
+
+int is_final_state(State *estado_actual){
+    if(estado_actual->x == (N - 1) && estado_actual->y == (N - 1)){
+        return 1;
+    }
+    return 0;
+}
+
+State *transition(State *estado_actual, int accion, int maze[N][N]){
+    State *nuevo = (State*)malloc(sizeof(State));
+    if(nuevo == NULL) return NULL;
+    nuevo->x = estado_actual->x;
+    nuevo->y = estado_actual->y;
+    nuevo->steps = estado_actual->steps + 1;
+    nuevo->parent = estado_actual;
+    if(accion == arriba) nuevo->x -= 1;
+    else if(accion == abajo) nuevo->x += 1;
+    else if(accion == derecha) nuevo->y += 1;
+    else if(accion == izquierda) nuevo->y -= 1;
+    if(nuevo->x < 0 || nuevo->x >= N || nuevo->y < 0 || nuevo->y >= N){
+        free(nuevo);
+        return NULL;
+    }
+    if(maze[nuevo->x][nuevo->y] != 0){
+        free(nuevo);
+        return NULL;
+    }
+    return nuevo;
+}
+
+List *get_adjacent_nodes(State* estado_actual, int maze[N][N]){
+    List *adj = list_create();
+    for(int accion = 1; accion <= 4; accion ++){
+        State *nuevo = transition(estado_actual, accion, maze);
+        if(nuevo != NULL){
+            list_pushBack(adj, nuevo);
+        }
+    }
+    return adj;
+}
+void imprimirRutaFinal(State *estado_final, int maze[N][N]){
+    int copiaMaze[N][N];
+    for(int i = 0; i < N; i++)
+        for(int j = 0; j < N; j++)
+            copiaMaze[i][j] = maze[i][j];
+    State *actual = estado_final;
+    while(actual != NULL){
+        copiaMaze[actual->x][actual->y] = 2;
+        actual = actual->parent;
+    }
+    for(int i = 0; i < N; i++){
+        for(int j = 0; j < N; j++){
+            if(i == 0 && j == 0) printf(" I ");
+            else if(i == N-1 && j == N-1) printf(" M ");
+            else if(copiaMaze[i][j] == 2) printf(" + ");
+            else if(copiaMaze[i][j] == 1) printf("[X]");
+            else printf(" . ");
+        }
+        printf("\n");
+    }
+}
+void dfs(State *estado_actual, int maze[N][N]){
+    Stack *pila = stack_create(NULL);
+    int visitado[N][N] = {0};
+    int cont = 0;
+    stack_push(pila, estado_actual);
+    while(stack_top(pila) != NULL){
+        State *actual = (State*)stack_pop(pila);
+        cont++;
+        if(is_final_state(actual)){
+            printf("\n Busqueda en profundidad\n");
+            imprimirRutaFinal(actual, maze);
+            printf("Pasos desde el principio: %d\n", actual->steps);
+            printf("Cantidad iteraciones: %d\n", cont);
+            free(pila);
+            return;
+        }
+        if(visitado[actual->x][actual->y] == 1){
+            free(actual);
+            continue;
+        }
+        visitado[actual->x][actual->y] = 1;
+        List *adyacentes = get_adjacent_nodes(actual, maze);
+        State *adyacenteValido = (State*)list_popFront(adyacentes);
+        while(adyacenteValido != NULL){
+            if(visitado[adyacenteValido->x][adyacenteValido->y] == 0){
+                stack_push(pila, adyacenteValido);
+            }
+            else free(adyacenteValido);
+            adyacenteValido = (State*)list_popFront(adyacentes);
+        }
+        free(adyacentes);
+    }
+    printf("\nSolucion de busqueda no encontrada\n");
+    stack_clean(pila);
+    free(pila);
+}
+
 
 int main() {
     // Inicializar la semilla de aleatoriedad
@@ -67,33 +173,33 @@ int main() {
 
     // Estado inicial del puzzle
     // Laberinto generado con la dificultad ingresada por el usuario
-    State estado_inicial = crearEstadoInicial(maze, dificultad);
+    State* estado_inicial = crearEstadoInicial(maze, dificultad);
 
     // Imprime el estado inicial
     printf("\nEstado inicial del puzzle:\n");
-    imprimirEstado(&estado_inicial);
+    imprimirEstado(estado_inicial, maze);
 
-    printf("Distancia L1: %d\n", distancia_L1(&estado_inicial));
+    printf("Distancia L1: %d\n", distancia_L1(estado_inicial));
 
     // Ejemplo de heap (cola con prioridad)
-    printf("\n***** EJEMPLO USO DE HEAP ******\nCreamos un Heap e insertamos 3 elementos con distinta prioridad\n");
+    /*printf("\n***** EJEMPLO USO DE HEAP ******\nCreamos un Heap e insertamos 3 elementos con distinta prioridad\n");
     Heap* heap = heap_create();
     char* data = strdup("Cinco");
     printf("Insertamos el elemento %s con prioridad -5\n", data);
-    heap_push(heap, data, -5 /*prioridad*/);
+    heap_push(heap, data, -5 /*prioridad*);
     data = strdup("Seis");
     printf("Insertamos el elemento %s con prioridad -6\n", data);
-    heap_push(heap, data, -6 /*prioridad*/);
+    heap_push(heap, data, -6 /*prioridad*);
     data = strdup("Siete");
     printf("Insertamos el elemento %s con prioridad -7\n", data);
-    heap_push(heap, data, -7 /*prioridad*/);
+    heap_push(heap, data, -7 /*prioridad*);
 
     printf("\nLos elementos salen del Heap ordenados de mayor a menor prioridad\n");
     while (heap_top(heap) != NULL){
         printf("Top: %s\n", (char*) heap_top(heap));      
         heap_pop(heap);
     }
-    printf("No hay más elementos en el Heap\n");
+    printf("No hay más elementos en el Heap\n");*/
 
     char opcion;
     do {
@@ -112,7 +218,7 @@ int main() {
 
         switch (opcion) {
         case '1':
-          //dfs(estado_inicial);
+            dfs(estado_inicial, maze);
           break;
         case '2':
           //bfs(estado_inicial);
