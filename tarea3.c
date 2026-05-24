@@ -4,6 +4,7 @@
 #include "tdas/heap.h"
 #include "tdas/extra.h"
 #include "tdas/stack.h"
+#include "tdas/queue.h"
 #include <string.h>
 #include <time.h>
 
@@ -153,6 +154,43 @@ void dfs(State *estado_actual, int maze[N][N]){
     stack_clean(pila);
     free(pila);
 }
+void bfs(State *estado_actual, int maze[N][N]){
+    Queue *cola = queue_create(NULL);
+    int visitado[N][N] = {0};
+    int cont = 0;
+    queue_insert(cola, estado_actual);
+    while(queue_front(cola) != NULL){
+        State *actual = (State*)queue_remove(cola);
+        cont++;
+        if(is_final_state(actual)){
+            printf("\n Busqueda en anchura\n");
+            imprimirRutaFinal(actual, maze);
+            printf("Pasos desde el principio: %d\n", actual->steps);
+            printf("Cantidad iteraciones: %d\n", cont);
+            free(cola);
+            return;
+        }
+        if(visitado[actual->x][actual->y] == 1){
+            free(actual);
+            continue;
+        }
+        visitado[actual->x][actual->y] = 1;
+        List *adyacentes = get_adjacent_nodes(actual,maze);
+        State *adyacenteValido = (State*)list_popFront(adyacentes);
+        while(adyacenteValido != NULL){
+            if(visitado[adyacenteValido->x][adyacenteValido->y] == 0){
+                queue_insert(cola, adyacenteValido);
+            }
+            else free(adyacenteValido);
+            adyacenteValido = (State*)list_popFront(adyacentes);
+        }
+        free(adyacentes);
+    }
+    printf("\nSolucion de busqueda no encontrada\n");
+    queue_clean(cola);
+    free(cola);
+    
+}
 
 
 int main() {
@@ -221,7 +259,7 @@ int main() {
             dfs(estado_inicial, maze);
           break;
         case '2':
-          //bfs(estado_inicial);
+            bfs(estado_inicial, maze);
           break;
         case '3':
           //best_first(estado_inicial);
