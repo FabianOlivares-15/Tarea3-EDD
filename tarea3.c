@@ -45,7 +45,7 @@ void imprimirEstado(const State *estado, int maze[N][N]) {
         printf("\n");
     }
 }
-
+// se inicializa el estado inicial donde empezamos con sus variables
 State* crearEstadoInicial(int maze[N][N], int dificultad){
      // Copiar el laberinto generado al estado
     generate_maze(maze,  dificultad);
@@ -66,12 +66,12 @@ int is_final_state(State *estado_actual){
 }
 
 State *transition(State *estado_actual, int accion, int maze[N][N]){
-    State *nuevo = (State*)malloc(sizeof(State));
+    State *nuevo = (State*)malloc(sizeof(State)); // creamos nuevo estado
     if(nuevo == NULL) return NULL;
-    nuevo->x = estado_actual->x;
+    nuevo->x = estado_actual->x; // asignamos las variables del struct
     nuevo->y = estado_actual->y;
-    nuevo->steps = estado_actual->steps + 1;
-    nuevo->parent = estado_actual;
+    nuevo->steps = estado_actual->steps + 1; // le sumamos un paso mas
+    nuevo->parent = estado_actual; // dejamos como padre al actual, para saber luego el camino recorrido
     if(accion == arriba) nuevo->x -= 1;
     else if(accion == abajo) nuevo->x += 1;
     else if(accion == derecha) nuevo->y += 1;
@@ -192,6 +192,48 @@ void bfs(State *estado_actual, int maze[N][N]){
     
 }
 
+void best_first(State *estado_actual, int maze[N][N]){
+    Heap *heap = heap_create();
+    int visitado[N][N] = {0};
+    int cont = 0;
+    int pasos = estado_actual->steps;
+    int prioridad = -(pasos + distancia_L1(estado_actual));
+    heap_push(heap, estado_actual, prioridad);
+    while(heap_top(heap) != NULL){
+        State *actual = (State*)heap_top(heap);
+        heap_pop(heap);
+        cont++;
+        if(is_final_state(actual)){
+            printf("\nBusqueda A* encontrada\n");
+            imprimirRutaFinal(actual, maze);
+            printf("Pasos desde el principio: %d\n", actual->steps);
+            printf("Cantidad iteraciones: %d\n", cont);
+            free(heap);
+            return;
+        }
+        if(visitado[actual->x][actual->y] == 1){
+            free(actual);
+            continue;
+        }
+        visitado[actual->x][actual->y] = 1;
+        List *adyacentes = get_adjacent_nodes(actual, maze);
+        State *adyacenteValido = (State*)list_popFront(adyacentes);
+        while(adyacenteValido != NULL){
+            if(visitado[adyacenteValido->x][adyacenteValido->y] == 0){
+                int steps = adyacenteValido->steps;
+                int prio = -(steps + distancia_L1(adyacenteValido));
+                heap_push(heap, adyacenteValido, prio);
+            }
+            else{
+                free(adyacenteValido);
+            }
+            adyacenteValido = (State*)list_popFront(adyacentes);
+        }
+        free(adyacentes);
+    }
+    printf("\nSolucion de busqueda no encontrada\n");
+    free(heap);
+}
 
 int main() {
     // Inicializar la semilla de aleatoriedad
@@ -262,7 +304,7 @@ int main() {
             bfs(estado_inicial, maze);
           break;
         case '3':
-          //best_first(estado_inicial);
+            best_first(estado_inicial, maze);
           break;
         }
 
