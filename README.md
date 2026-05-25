@@ -17,23 +17,12 @@ En la carpeta `tdas` se encuentran implementados distintos TDAs que puedes utili
 Las implementaciones no son las más eficientes (todas usan como estructura de datos una **lista enlazada**), por lo que puedes reemplazarlas por las que has realizado en los labs.
 
 ## TODAS LAS FUNCIONES SIRVEN CORRECTAMENTE
-1. Cargar peliculas: Lee el archivo y carga toda la informacion en los mapas correspondientes, para luego hacer busquedas ultrarapidas, muestra lo que cargamos.
-2. Buscar por ID: Recibimos un id, y mostramos con una busqueda rapida la informacion de la pelicula correspondiente a ese id.
-3. Buscar por genero: Recibimos un genero, y mostramos todas las peliculas que comparten ese genero e informacion de estas.
-4. Buscar por director: Recibimos el nombre de algun director(a), y mostramos todas las obras de este, con la informacion correspondiente.
-5. Buscar por decada: Recibimos un año, calculamos la decada de este, y mostramos las peliculas lanzadas durante esa decada con su informacion.
-6. Busqueda avanzada: Es un filtro de busqueda doble, donde recibimos un genero y un año, buscamos en el mapa de genero, y luego vamos preguntando si corresponde a la decada antes calculada con el año y se imprimen aquellas que cumplan con el genero y decada indicados.
-7. Gestionar mi watchlist: Abre un submenu que crea una lista de favoritos, que permite agregar, eliminar y mostrar lo de esta lista.
-   .Agregar ID: Valida que el ID que vamos a agregar a nuestra lista exista, si es asi guardamos la informacion de esta pelicula.
-   .Eliminar pelicula: Buscamos el ID indicado dentro de nuestra lista y lo eliminamos.
-   .Mostrar watchlist: Mostramos el contenido de nuestra lista.
+1. busqueda en profundidad(DFS): utilizamos una pila, y buscamos una ruta funcional, no es la ruta mas corta.
+2. busqueda en anchura(BFS): Utilizamos una cola, busca en forma de "ondas", encuentra la ruta en una menor cantidad de pasos posibles, pero mas iteraciones.
+3. busqueda A*: Utilizamos el heap, debemos en cada iteracion utiizar el estado que minimice la funcion de evaluacion, la distanciaL1 + pasos, igual encuentra la ruta mas corta pero con menos iteraciones. 
 
 ## EJEMPLO DE FUNCIONAMIENTO
-Iniciamos el programa y usamos la opción 1 para cargar el catálogo. El sistema lee el archivo y guarda los datos en los mapas.
-Presionamos el 3, escribimos el género Comedy y el sistema imprime todas las comedias con sus años, ratings y directores.
-Presionamos el 4, escribimos el director ej(Fabian Olivares) y el sistema imprime todas las obras de este director con sus años, ratings y generos.
-Presionamos el 5, escribimos el año de lanzamiento y el sistema imprime todas las peliculas de la decada con su año, ratings y directores.
-Queremos algo más específico, presionamos el 6 (Búsqueda avanzada). Escribimos el género Comedy y luego el año 1985. El programa nos muestra  las películas de comedia de la década de los 80s.
-Vemos una película que nos gusta y copiamos su ID. Presionamos el 7 para entrar a la Watchlist y luego el 1 para agregar. Pegamos el ID y el sistema valida que existe, guardándola en nuestros favoritos.
-Volvemos al submenú de la Watchlist (opción 7) y presionamos el 3. El sistema nos muestra nuestra lista de favoritos con los títulos que hemos ido agregando.
-Si ya vimos una de las películas, entramos al menú 7, elegimos la opción 2 (Eliminar), ingresamos el ID de la película y esta se borra de nuestra lista personal.
+Iniciamos el programa el sistema nos pide ingresar una dificultad de 0 a 100, el programa imprime en pantalla el mapa recién creado, mostrando el inicio I, la meta M y los muros [X].
+Presionamos el 1 y vemos la busqueda en profundidad(DFS), el programa calcula y vuelve a imprimir el mapa, ahora con el camino marcado con caracter +. Nos indica que llegó a la meta en, ejemplo: 40 pasos y con 75 iteraciones.
+Presionamos el 2 y vemos la busqueda en anchura(BFS), el programa calcula e imprime el mapa marcado con caracter +, nos indica que llego en ejemplo: 20 pasos y 120 iteraciones.
+Presionamos el 3 y vemos la busqueda A*, se imprime mostrando el mismo camino de 20 pasos, pero esta vez solo le tomó 35 iteraciones gracias al calculo de la funcion de evaluacion , la distanciaL1 + pasos.
